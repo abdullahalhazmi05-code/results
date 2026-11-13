@@ -1,0 +1,160 @@
+<meta charset="utf-8">
+<title>استعلام الدرجات</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one centred column, a form card above a result card, RTL Arabic */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --fg:#14231d; --muted:#5a6b63; --line:#d6e0da;
+  --accent:#0b6b4f; --accent-fg:#ffffff; --accent-soft:#e1f0e9; --err:#a32b2b; --err-bg:#fbeaea;
+  --font:'IBM Plex Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1815; --surface:#17231e; --fg:#e7f0ec; --muted:#98aaa1; --line:#2b3d35;
+  --accent:#4ec29a; --accent-fg:#06231a; --accent-soft:#1c3329; --err:#ff9a9a; --err-bg:#3a1d1d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1815; --surface:#17231e; --fg:#e7f0ec; --muted:#98aaa1; --line:#2b3d35;
+  --accent:#4ec29a; --accent-fg:#06231a; --accent-soft:#1c3329; --err:#ff9a9a; --err-bg:#3a1d1d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.7;
+  padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+header h1{font-size:1.6rem;margin:0;line-height:1.3;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted)}
+.school{font-size:.9rem;font-weight:600;color:var(--accent);letter-spacing:.02em}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
+form{display:flex;flex-direction:column;gap:16px}
+label{display:block;font-weight:600;margin-bottom:4px}
+input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hint{font-size:.85rem;color:var(--muted);margin-top:2px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:11px 18px;cursor:pointer;background:var(--accent);color:var(--accent-fg)}
+button.alt{background:var(--accent-soft);color:var(--accent)}
+button:disabled{opacity:.6;cursor:wait}
+.msg{padding:10px 12px;border-radius:8px;background:var(--err-bg);color:var(--err);font-weight:500}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px 16px;margin:0 0 16px}
+.info div{min-width:0}
+.info dt{font-size:.8rem;color:var(--muted);letter-spacing:.02em}
+.info dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.info .wide{grid-column:1/-1}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sheet{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+canvas{display:block;width:100%;height:auto}
+.foot{font-size:.85rem;color:var(--muted)}
+.ltr{direction:ltr;unicode-bidi:plaintext;text-align:right}
+</style>
+
+<main dir="rtl" lang="ar">
+  <header>
+    <div class="school">ثانوية كرامة الأحمر - مسارات</div>
+    <h1>استعلام إشعار الدرجات</h1>
+    <p>إشعار فترة أولى، الفصل الدراسي الأول 1447-1448</p>
+  </header>
+
+  <section class="card" id="formCard">
+    <form id="f" autocomplete="off">
+      <div>
+        <label for="nid">رقم الهوية</label>
+        <input id="nid" inputmode="numeric" dir="ltr" required>
+      </div>
+      <div id="err" class="msg" role="alert" hidden></div>
+      <button id="go" type="submit">استعلام</button>
+    </form>
+  </section>
+
+  <section class="card" id="res" hidden aria-live="polite">
+    <dl class="info">
+      <div class="wide"><dt>اسم الطالب</dt><dd id="rn"></dd></div>
+      <div><dt>رقم الهوية</dt><dd id="ri" class="ltr"></dd></div>
+      <div><dt>الصف</dt><dd id="rg"></dd></div>
+      <div><dt>الفصل</dt><dd id="rc"></dd></div>
+    </dl>
+    <div class="row">
+      <button id="dl" class="alt" type="button" hidden>حفظ ملف PDF</button>
+      <button id="again" class="alt" type="button">استعلام جديد</button>
+    </div>
+    <div class="sheet"><canvas id="cv" aria-label="إشعار الدرجات"></canvas></div>
+    <p class="foot" id="rf"></p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var enc=new TextEncoder();
+  function b64u8(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+  function hex2u8(h){var u=new Uint8Array(h.length/2);for(var i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);return u}
+  function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
+  function normId(s){
+    s=s.replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[۰-۹]/g,function(c){return c.charCodeAt(0)-1776}).toLowerCase();
+    return s.replace(/[^0-9a-z$]/g,'').replace(/^0+/,'');
+  }
+  function normName(s){
+    return s.replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').split(/\s+/).filter(Boolean);
+  }
+  function show(el,on){el.hidden=!on}
+  function fail(t){$('err').textContent=t;show($('err'),true);$('go').disabled=false;$('go').textContent='استعلام'}
+  async function aesDec(keyBytes,blob){
+    var d=b64u8(blob),k=await crypto.subtle.importKey('raw',keyBytes,'AES-GCM',false,['decrypt']);
+    return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:d.slice(0,12)},k,d.slice(12)));
+  }
+  async function load(shard,sid,key){
+    var r=await fetch('s/'+shard+'.json');
+    if(!r.ok)throw new Error('shard');
+    var j=await r.json();
+    if(!j[sid])throw new Error('sid');
+    var raw=await aesDec(key,j[sid]);
+    return JSON.parse(new TextDecoder().decode(raw));
+  }
+  var pdfBytes=null,fname='';
+  async function render(bytes){
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    var doc=await pdfjsLib.getDocument({data:bytes.slice()}).promise;
+    var page=await doc.getPage(1),vp=page.getViewport({scale:2.2}),cv=$('cv');
+    cv.width=vp.width;cv.height=vp.height;
+    await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+  }
+  async function showResult(p){
+    $('rn').textContent=p.n;$('ri').textContent=p.i;$('rg').textContent=p.g;$('rc').textContent='الفصل '+p.c;
+    $('rf').textContent=p.d+' - '+p.t+' '+p.y+'. هذه الوثيقة ليست النتيجة النهائية.';
+    pdfBytes=b64u8(p.p);fname=p.n+' - '+p.i+'.pdf';
+    show($('formCard'),false);show($('res'),true);
+    try{await render(pdfBytes)}catch(e){$('rf').textContent='تعذر عرض الملف في الصفحة. استخدم زر حفظ PDF.'}
+    show($('dl'),true);
+  }
+  $('dl').onclick=async function(){
+    var blob=new Blob([pdfBytes],{type:'application/pdf'});
+    try{if(window.claude&&claude.use){var d=await claude.use('downloads');if(d){await d.save({filename:fname,data:blob});return}}}catch(e){}
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove();
+  };
+  $('again').onclick=function(){
+    try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+    show($('res'),false);show($('formCard'),true);show($('err'),false);$('go').disabled=false;$('go').textContent='استعلام';
+  };
+  $('f').addEventListener('submit',async function(ev){
+    ev.preventDefault();show($('err'),false);
+    var id=normId($('nid').value);
+    if(!id){return fail('اكتب رقم الهوية.')}
+    $('go').disabled=true;$('go').textContent='جار الاستعلام...';
+    try{
+      var mat=id;
+      var H=hex(await crypto.subtle.digest('SHA-256',enc.encode('h|'+mat)));
+      var idx=await (await fetch('idx.json')).json();
+      var e=idx[H];
+      if(!e)return fail('لم يتم العثور على طالب بهذه البيانات. تأكد من رقم الهوية.');
+      var km=await crypto.subtle.importKey('raw',enc.encode('k|'+mat),'PBKDF2',false,['deriveBits']);
+      var Kd=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:enc.encode('karama-1447'),iterations:50000},km,256));
+      var key=await aesDec(Kd,e.w);
+      var p=await load(e.s,e.i,key);
+      await showResult(p);
+    }catch(x){fail('تعذر تحميل النتيجة. حاول مرة أخرى.')}
+  });
+  // Direct per-student link: #<shard>-<id>-<key>
+  var m=/^#(a\d\d)-([0-9a-f]{6})-([0-9a-f]{32})$/.exec(location.hash);
+  if(m){
+    $('go').disabled=true;$('go').textContent='جار تحميل النتيجة...';
+    load(m[1],m[2],hex2u8(m[3])).then(showResult).catch(function(){fail('الرابط غير صالح. استخدم رقم الهوية.')});
+  }
+})();
+</script>
