@@ -39,7 +39,7 @@ button:disabled{opacity:.6;cursor:wait}
 .info .wide{grid-column:1/-1}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sheet{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
-canvas{display:block;width:100%;height:auto}
+#cv{display:block;width:100%;height:auto}
 .foot{font-size:.85rem;color:var(--muted)}
 .ltr{direction:ltr;unicode-bidi:plaintext;text-align:right}
 </style>
@@ -73,12 +73,11 @@ canvas{display:block;width:100%;height:auto}
       <button id="dl" class="alt" type="button" hidden>حفظ ملف PDF</button>
       <button id="again" class="alt" type="button">استعلام جديد</button>
     </div>
-    <div class="sheet"><canvas id="cv" aria-label="إشعار الدرجات"></canvas></div>
+    <div class="sheet"><img id="cv" alt="إشعار الدرجات"></div>
     <p class="foot" id="rf"></p>
   </section>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
@@ -108,19 +107,12 @@ canvas{display:block;width:100%;height:auto}
     return JSON.parse(new TextDecoder().decode(raw));
   }
   var pdfBytes=null,fname='';
-  async function render(bytes){
-    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    var doc=await pdfjsLib.getDocument({data:bytes.slice()}).promise;
-    var page=await doc.getPage(1),vp=page.getViewport({scale:2.2}),cv=$('cv');
-    cv.width=vp.width;cv.height=vp.height;
-    await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
-  }
   async function showResult(p){
     $('rn').textContent=p.n;$('ri').textContent=p.i;$('rg').textContent=p.g;$('rc').textContent='الفصل '+p.c;
     $('rf').textContent=p.d+' - '+p.t+' '+p.y+'. هذه الوثيقة ليست النتيجة النهائية.';
     pdfBytes=b64u8(p.p);fname=p.n+' - '+p.i+'.pdf';
     show($('formCard'),false);show($('res'),true);
-    try{await render(pdfBytes)}catch(e){$('rf').textContent='تعذر عرض الملف في الصفحة. استخدم زر حفظ PDF.'}
+    $('cv').src='data:image/png;base64,'+p.im;
     show($('dl'),true);
   }
   $('dl').onclick=async function(){
