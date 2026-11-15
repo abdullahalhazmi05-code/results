@@ -6,7 +6,7 @@
 <title>نتائج الاختبار التجريبي</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: single column with the student lookup */
+/* Layout: one wide column; dashboard first (KPIs, ranking, items, time, analysis), student lookup last, linked from the header */
 :root{
   --bg:#f3f6f4; --surface:#ffffff; --fg:#14231d; --muted:#5a6b63; --line:#d6e0da; --track:#e6ede9;
   --accent:#0b6b4f; --accent-fg:#ffffff; --accent-soft:#e1f0e9;
@@ -89,6 +89,24 @@ input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px so
 .ltr{direction:ltr;unicode-bidi:plaintext;text-align:right}
 #err{display:none}
 @media (max-width:560px){.row{grid-template-columns:1.8rem 1fr}.row>.bar,.row>div{grid-column:1/-1}h1{font-size:1.4rem}}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.kpi .l{font-size:.82rem;color:var(--muted);letter-spacing:.02em}
+.kpi .v{font-size:2rem;font-weight:700;line-height:1.25;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:.8rem;color:var(--muted)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:6px}
+table.t{border-collapse:collapse;width:100%;font-size:.95rem;font-variant-numeric:tabular-nums}
+table.t th{color:var(--muted);font-weight:500;font-size:.8rem;text-align:start;padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t td.num,table.t th.num{text-align:center}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.85rem}
+.badge.top{background:var(--accent);color:var(--accent-fg)}
+.mbar{position:relative;height:22px;background:var(--track);border-radius:4px;min-width:120px}
+.mbar i{position:absolute;inset-block:0;inset-inline-start:0;background:var(--s-all);border-radius:0 4px 4px 0}
+[dir=rtl] .mbar i{border-radius:4px 0 0 4px}
+.mbar b{position:absolute;inset-block:0;inset-inline-end:8px;display:flex;align-items:center;font-size:.85rem}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -97,7 +115,7 @@ input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px so
     <div>
       <div class="school">كرامة الأحمر الثانوية - مسارات</div>
       <h1>نتائج الاختبار التجريبي</h1>
-      <p class="sub">الاختبار التجريبي: الكمي واللفظي</p>
+      <p class="sub">الاختبار الكمي واللفظي</p>
     </div>
   </header>
 
@@ -111,6 +129,20 @@ input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px so
     <div id="err" class="msg" role="alert"></div>
     <div id="res" aria-live="polite"></div>
   </section>
+
+  <section class="kpis" id="kpis" aria-label="المتوسطات"></section>
+
+  <section class="card" id="grades">
+    <div class="sec-h"><h2>متوسط الصفوف</h2></div>
+    <div class="scroll"><table class="t" id="gradeTbl"></table></div>
+  </section>
+
+  <section class="card" id="rank">
+    <div class="sec-h"><h2>ترتيب الفصول ومتوسط كل فصل</h2></div>
+    <p class="note" id="rankNote"></p>
+    <div class="scroll"><table class="t" id="classTbl"></table></div>
+    <p class="note" id="smallNote" style="margin:12px 0 0"></p>
+  </section>
 </main>
 
 <script>
@@ -123,6 +155,24 @@ function opt(o){return String(o).replace(/ا/g,'أ')}
 var COL={C:'var(--s-all)',Q:'var(--s-q)',V:'var(--s-v)'},NAME={C:'المتوسط العام',Q:'الكمي',V:'اللفظي'};
 function bar(v,c,label,sm){return '<div class="bar'+(sm?' sm':'')+'" title="'+esc(label)+'"><i style="width:'+Math.max(0,Math.min(100,v))+'%;--c:'+c+'"></i><b>'+f1(v)+'%</b></div>'}
 
+
+function f1(x){return (Math.round(x*10)/10).toFixed(1)}
+function renderStats(){
+  var R=DATA.R,C=R.C,Q=R.Q,V=R.V;
+  var k=[['المتوسط العام',f1(C.mean)+'%','لـ'+C.n_both+' طالبا أدّوا الاختبارين','var(--s-all)'],
+   ['متوسط الكمي',f1(Q.mean_pct)+'%',f1(Q.mean_raw)+' من 16 - '+Q.n+' طالبا','var(--s-q)'],
+   ['متوسط اللفظي',f1(V.mean_pct)+'%',f1(V.mean_raw)+' من 10 - '+V.n+' طالبا','var(--s-v)']];
+  document.getElementById('kpis').innerHTML=k.map(function(x){return '<div class="kpi"><div class="l"><span class="dot" style="background:'+x[3]+'"></span>'+x[0]+'</div><div class="v">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'}).join('');
+  var head='<tr><th class="num">#</th><th>NAME</th><th class="num">الطلاب</th><th>المتوسط العام</th><th class="num"><span class="dot" style="background:var(--s-q)"></span>الكمي</th><th class="num"><span class="dot" style="background:var(--s-v)"></span>اللفظي</th></tr>';
+  function mb(v){return '<div class="mbar"><i style="width:'+v+'%"></i><b>'+f1(v)+'%</b></div>'}
+  function rows(a,name){return a.map(function(r,i){return '<tr><td class="num"><span class="badge'+(i<3?' top':'')+'">'+(i+1)+'</span></td><td>'+name(r)+'</td><td class="num">'+r.n+'</td><td>'+mb(r.mean)+'</td><td class="num">'+f1(r.q)+'%</td><td class="num">'+f1(r.v)+'%</td></tr>'}).join('')}
+  var g=C.by_grade.slice().sort(function(a,b){return b.mean-a.mean});
+  document.getElementById('gradeTbl').innerHTML=head.replace('NAME','الصف')+rows(g,function(r){return '<b>'+esc(r.key)+'</b>'});
+  var mn=R.min_n||5,all=C.by_class,ok=all.filter(function(c){return c.n>=mn}).sort(function(a,b){return b.mean-a.mean}),small=all.filter(function(c){return c.n<mn});
+  document.getElementById('classTbl').innerHTML=head.replace('NAME','الفصل')+rows(ok,function(r){return '<b>'+esc(r.grade)+'</b> - فصل '+esc(r.sec)});
+  document.getElementById('rankNote').textContent='مرتبة من الأعلى إلى الأدنى حسب المتوسط العام للطلاب الذين أدّوا الاختبارين.';
+  document.getElementById('smallNote').textContent=small.length?'لم تُرتَّب الفصول التي فيها أقل من '+mn+' طلاب ('+small.map(function(c){return c.grade+' - فصل '+c.sec+': '+c.n}).join('، ')+').':'';
+}
 /* ---- lookup ---- */
 var enc=new TextEncoder();
 function b64u8(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
@@ -142,7 +192,7 @@ function show(p){
     h+='<table><tr><th>الترتيب</th><th>ترتيبك</th><th>متوسط المجموعة</th></tr>';
     if(p.rc)h+='<tr><td>في الشعبة</td><td>'+p.rc+' من '+p.rcn+'</td><td>'+f1(p.ca)+'%</td></tr>';
     if(p.rg)h+='<tr><td>في الصف</td><td>'+p.rg+' من '+p.rgn+'</td><td>'+f1(p.ga)+'%</td></tr>';
-    h+='<tr><td>في المدرسة</td><td>'+p.rk+' من '+p.rkn+'</td><td>-</td></tr></table>';
+    h+='<tr><td>في المدرسة</td><td>'+p.rk+' من '+p.rkn+'</td><td>'+f1(DATA.R.C.mean)+'%</td></tr></table>';
     if(p.q&&p.q.t<1||p.v&&p.v.t<1)h+='<p class="note" style="margin-top:10px">ملاحظة: أُنهي أحد الاختبارين في أقل من دقيقة، وقد لا تعبّر نتيجته عن مستواك. يُنصح بإعادته.</p>';
   }else h+='<p class="note">يظهر المتوسط والترتيب بعد أداء الاختبارين.</p>';
   h+='<p class="note">الاختبار تجريبي وليس نتيجة نهائية. علامة ✓ تعني إجابة صحيحة. الاختبار الكمي من 8 أسئلة مصححة.</p>';
@@ -162,7 +212,7 @@ $('f').addEventListener('submit',async function(ev){
   }catch(e){fail('تعذر عرض النتيجة. حاول مرة أخرى.')}
 });
 fetch('data.json').then(function(r){return r.json()}).then(function(j){
-  DATA={stu:j.stu};
+  DATA={stu:j.stu,R:j.agg&&j.agg.R};if(DATA.R)renderStats();
 }).catch(function(){document.body.insertAdjacentHTML('afterbegin','<p class="msg">تعذر تحميل البيانات.</p>')});
 })();
 </script>
