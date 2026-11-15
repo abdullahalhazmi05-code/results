@@ -111,23 +111,6 @@ input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px so
     <div id="err" class="msg" role="alert"></div>
     <div id="res" aria-live="polite"></div>
   </section>
-
-  <section class="kpis" id="kpis" aria-label="مؤشرات رئيسية"></section>
-
-  <section class="card" id="rank">
-    <h2>متوسط الفصول وترتيبها</h2>
-    <p class="note" id="rankNote"></p>
-    <div class="seg" role="group" aria-label="نوع النتيجة">
-      <button type="button" data-m="C" aria-pressed="true">المتوسط العام</button>
-      <button type="button" data-m="Q" aria-pressed="false">الكمي</button>
-      <button type="button" data-m="V" aria-pressed="false">اللفظي</button>
-    </div>
-    <h3>الصفوف</h3>
-    <ul class="rows" id="gradeRows"></ul>
-    <h3 style="margin-top:18px">الفصول مرتبة من الأعلى إلى الأدنى</h3>
-    <ul class="rows" id="classRows"></ul>
-    <p class="note" id="smallNote" style="margin-top:12px"></p>
-  </section>
 </main>
 
 <script>
@@ -140,31 +123,6 @@ function opt(o){return String(o).replace(/ا/g,'أ')}
 var COL={C:'var(--s-all)',Q:'var(--s-q)',V:'var(--s-v)'},NAME={C:'المتوسط العام',Q:'الكمي',V:'اللفظي'};
 function bar(v,c,label,sm){return '<div class="bar'+(sm?' sm':'')+'" title="'+esc(label)+'"><i style="width:'+Math.max(0,Math.min(100,v))+'%;--c:'+c+'"></i><b>'+f1(v)+'%</b></div>'}
 
-function renderKpis(){
-  var R=DATA.R,Q=R.Q,V=R.V,C=R.C;
-  var k=[['المتوسط العام',f1(C.mean)+'%','لـ'+C.n_both+' طالبا أدّوا الاختبارين',COL.C],
-   ['متوسط الكمي',f1(Q.mean_pct)+'%',f1(Q.mean_raw)+' من 16 ('+Q.n+' طالبا)',COL.Q],
-   ['متوسط اللفظي',f1(V.mean_pct)+'%',f1(V.mean_raw)+' من 10 ('+V.n+' طالبا)',COL.V],
-];
-  $('kpis').innerHTML=k.map(function(x){return '<div class="kpi"><div class="l">'+(x[3]?'<span class="dot" style="background:'+x[3]+'"></span>':'')+x[0]+'</div><div class="v">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'}).join('');
-}
-function classList(m){
-  var R=DATA.R,src=(m=='C'?R.C:R[m]).by_class,mn=DATA.agg.min_n;
-  var ok=src.filter(function(c){return c.n>=mn}).sort(function(a,b){return b.mean-a.mean});
-  var small=src.filter(function(c){return c.n<mn});
-  return {ok:ok,small:small};
-}
-function renderRank(){
-  var R=DATA.R,m=mode,g=(m=='C'?R.C:R[m]).by_grade.slice().sort(function(a,b){return b.mean-a.mean});
-  $('rankNote').textContent=m=='C'?'المتوسط العام = متوسط نسبتي الكمي واللفظي للطلاب الذين أدّوا الاختبارين فقط.':('متوسط '+NAME[m]+' لكل من أدّى الاختبار.');
-  $('gradeRows').innerHTML=g.map(function(r,i){return '<li class="row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(r.key)+'<small>'+r.n+' طالبا</small></span>'+bar(r.mean,COL[m],r.key+': '+f1(r.mean)+'%')+'</li>'}).join('');
-  var L=classList(m);
-  $('classRows').innerHTML=L.ok.map(function(r,i){
-    var extra=m=='C'?'<div class="mini"><span><span class="dot" style="background:var(--s-q)"></span>كمي '+f1(r.q)+'%</span><span><span class="dot" style="background:var(--s-v)"></span>لفظي '+f1(r.v)+'%</span></div>':'';
-    return '<li class="row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(r.grade)+' - فصل '+esc(r.sec)+'<small>'+r.n+' طالبا</small></span><div>'+bar(r.mean,COL[m],r.key+': '+f1(r.mean)+'%')+extra+'</div></li>'}).join('');
-  $('smallNote').textContent=(L.small.length?'لم تُرتَّب الفصول التي فيها أقل من '+DATA.agg.min_n+' طلاب ('+L.small.map(function(c){return c.grade+' - فصل '+c.sec+': '+c.n}).join('، ')+')، وغالبا هي أخطاء في اختيار الفصل. ':'')+'هامش الخطأ التقريبي لمتوسط الفصل ±'+f1(DATA.agg.moe)+' نقطة، فلا يُعتمد على فروق أقل منه بين فصلين متجاورين.';
-  var bs=document.querySelectorAll('.seg button');for(var i=0;i<bs.length;i++)bs[i].setAttribute('aria-pressed',bs[i].dataset.m==m);
-}
 /* ---- lookup ---- */
 var enc=new TextEncoder();
 function b64u8(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
@@ -184,7 +142,7 @@ function show(p){
     h+='<table><tr><th>الترتيب</th><th>ترتيبك</th><th>متوسط المجموعة</th></tr>';
     if(p.rc)h+='<tr><td>في الشعبة</td><td>'+p.rc+' من '+p.rcn+'</td><td>'+f1(p.ca)+'%</td></tr>';
     if(p.rg)h+='<tr><td>في الصف</td><td>'+p.rg+' من '+p.rgn+'</td><td>'+f1(p.ga)+'%</td></tr>';
-    h+='<tr><td>في المدرسة</td><td>'+p.rk+' من '+p.rkn+'</td><td>'+f1(DATA.R.C.mean)+'%</td></tr></table>';
+    h+='<tr><td>في المدرسة</td><td>'+p.rk+' من '+p.rkn+'</td><td>-</td></tr></table>';
     if(p.q&&p.q.t<1||p.v&&p.v.t<1)h+='<p class="note" style="margin-top:10px">ملاحظة: أُنهي أحد الاختبارين في أقل من دقيقة، وقد لا تعبّر نتيجته عن مستواك. يُنصح بإعادته.</p>';
   }else h+='<p class="note">يظهر المتوسط والترتيب بعد أداء الاختبارين.</p>';
   h+='<p class="note">الاختبار تجريبي وليس نتيجة نهائية. علامة ✓ تعني إجابة صحيحة. الاختبار الكمي من 8 أسئلة مصححة.</p>';
@@ -203,10 +161,8 @@ $('f').addEventListener('submit',async function(ev){
     show(JSON.parse(new TextDecoder().decode(await aesDec(Kd,w))));
   }catch(e){fail('تعذر عرض النتيجة. حاول مرة أخرى.')}
 });
-document.querySelector('.seg').addEventListener('click',function(e){var m=e.target.dataset&&e.target.dataset.m;if(m){mode=m;renderRank()}});
 fetch('data.json').then(function(r){return r.json()}).then(function(j){
-  DATA={R:j.agg.R,agg:j.agg,stu:j.stu};
-  renderKpis();renderRank();
+  DATA={stu:j.stu};
 }).catch(function(){document.body.insertAdjacentHTML('afterbegin','<p class="msg">تعذر تحميل البيانات.</p>')});
 })();
 </script>
