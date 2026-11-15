@@ -88,65 +88,20 @@ input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px so
 .chip.ok{background:var(--accent-soft);color:var(--good)} .chip.no{background:var(--err-bg);color:var(--bad)} .chip.na{color:var(--muted)}
 .ltr{direction:ltr;unicode-bidi:plaintext;text-align:right}
 #err{display:none}
-@media (max-width:560px){.row{grid-template-columns:1.8rem 1fr}.row .bar{grid-column:1/-1}h1{font-size:1.4rem}}
+@media (max-width:560px){.row{grid-template-columns:1.8rem 1fr}.row>.bar,.row>div{grid-column:1/-1}h1{font-size:1.4rem}}
 </style>
 </head>
 <body>
 <main>
   <header>
     <div>
-      <div class="school">ثانوية كرامة الأحمر - مسارات</div>
+      <div class="school">كرامة الأحمر الثانوية - مسارات</div>
       <h1>نتائج الاختبار التجريبي</h1>
-      <p class="sub">الكمي واللفظي، الفصل الدراسي الأول 1447-1448</p>
+      <p class="sub">الاختبار التجريبي: الكمي واللفظي</p>
     </div>
-    <nav aria-label="التنقل"><a class="btn" href="#lookup" id="goLookup">استعلام الطالب</a><a class="btn alt" href="#analysis">التحليل والتوصيات</a></nav>
   </header>
 
-  <section class="kpis" id="kpis" aria-label="مؤشرات رئيسية"></section>
-
-  <section class="card" id="rank">
-    <h2>متوسط الصفوف والشعب وترتيبها</h2>
-    <p class="note" id="rankNote"></p>
-    <div class="seg" role="group" aria-label="نوع النتيجة">
-      <button type="button" data-m="C" aria-pressed="true">المتوسط العام</button>
-      <button type="button" data-m="Q" aria-pressed="false">الكمي</button>
-      <button type="button" data-m="V" aria-pressed="false">اللفظي</button>
-    </div>
-    <h3>الصفوف</h3>
-    <ul class="rows" id="gradeRows"></ul>
-    <h3 style="margin-top:18px">الشعب (مرتبة من الأعلى)</h3>
-    <ul class="rows" id="classRows"></ul>
-    <p class="note" id="smallNote" style="margin-top:12px"></p>
-  </section>
-
-  <section class="card" id="distCard">
-    <h2>توزيع الطلاب حسب النتيجة</h2>
-    <p class="note" id="distNote"></p>
-    <div class="hist" id="hist" role="img" aria-label="توزيع الطلاب"></div>
-  </section>
-
-  <section class="card" id="items">
-    <h2>الأسئلة: الأسهل والأصعب</h2>
-    <p class="note">النسبة هي من أجابوا الإجابة الصحيحة. «التمييز» يقيس هل يجيب الطلاب الأقوى صحيحا أكثر من الأضعف (فوق 0.30 جيد، ودون 0.20 ضعيف).</p>
-    <div class="two"><div><h3><span class="dot" style="background:var(--s-q)"></span>الاختبار الكمي</h3><ul class="rows" id="qItems"></ul></div>
-    <div><h3><span class="dot" style="background:var(--s-v)"></span>الاختبار اللفظي</h3><ul class="rows" id="vItems"></ul></div></div>
-    <details><summary>مفتاح التصحيح المستخدم في اللفظي</summary><div class="scroll"><table id="keyTbl"></table></div></details>
-  </section>
-
-  <section class="card" id="time">
-    <h2>زمن الحل</h2>
-    <p class="note">الزمن من بدء النموذج إلى إرساله، لكل اختبار كاملا (لا يتوفر زمن كل سؤال).</p>
-    <div class="kpis" id="timeK"></div>
-    <div class="scroll" style="margin-top:12px"><table id="timeTbl"></table></div>
-  </section>
-
-  <section class="card prose" id="analysis">
-    <h2>التحليل الإحصائي والتوصيات</h2>
-    <div id="narr"></div>
-    <details><summary>ملاحظات عن البيانات</summary><ul id="notes" style="margin-top:8px"></ul></details>
-  </section>
-
-  <section class="card" id="lookup">
+    <section class="card" id="lookup">
     <h2>استعلام الطالب</h2>
     <p class="note">اكتب رقم السجل المدني لعرض نتيجتك في الاختبارين وترتيبك.</p>
     <form id="f" autocomplete="off">
@@ -155,6 +110,23 @@ input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px so
     </form>
     <div id="err" class="msg" role="alert"></div>
     <div id="res" aria-live="polite"></div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="مؤشرات رئيسية"></section>
+
+  <section class="card" id="rank">
+    <h2>متوسط الفصول وترتيبها</h2>
+    <p class="note" id="rankNote"></p>
+    <div class="seg" role="group" aria-label="نوع النتيجة">
+      <button type="button" data-m="C" aria-pressed="true">المتوسط العام</button>
+      <button type="button" data-m="Q" aria-pressed="false">الكمي</button>
+      <button type="button" data-m="V" aria-pressed="false">اللفظي</button>
+    </div>
+    <h3>الصفوف</h3>
+    <ul class="rows" id="gradeRows"></ul>
+    <h3 style="margin-top:18px">الفصول مرتبة من الأعلى إلى الأدنى</h3>
+    <ul class="rows" id="classRows"></ul>
+    <p class="note" id="smallNote" style="margin-top:12px"></p>
   </section>
 </main>
 
@@ -173,8 +145,7 @@ function renderKpis(){
   var k=[['المتوسط العام',f1(C.mean)+'%','لـ'+C.n_both+' طالبا أدّوا الاختبارين',COL.C],
    ['متوسط الكمي',f1(Q.mean_pct)+'%',f1(Q.mean_raw)+' من 16 ('+Q.n+' طالبا)',COL.Q],
    ['متوسط اللفظي',f1(V.mean_pct)+'%',f1(V.mean_raw)+' من 10 ('+V.n+' طالبا)',COL.V],
-   ['متوسط زمن الحل',f1(Q.time.mean)+' / '+f1(V.time.mean)+' د','كمي / لفظي',null],
-   ['دون 50%',C.support_n,'طالبا من '+C.n_both+' يحتاجون دعما',null]];
+];
   $('kpis').innerHTML=k.map(function(x){return '<div class="kpi"><div class="l">'+(x[3]?'<span class="dot" style="background:'+x[3]+'"></span>':'')+x[0]+'</div><div class="v">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'}).join('');
 }
 function classList(m){
@@ -190,44 +161,9 @@ function renderRank(){
   var L=classList(m);
   $('classRows').innerHTML=L.ok.map(function(r,i){
     var extra=m=='C'?'<div class="mini"><span><span class="dot" style="background:var(--s-q)"></span>كمي '+f1(r.q)+'%</span><span><span class="dot" style="background:var(--s-v)"></span>لفظي '+f1(r.v)+'%</span></div>':'';
-    return '<li class="row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(r.grade)+' - '+esc(r.sec)+'<small>'+r.n+' طالبا</small></span><div>'+bar(r.mean,COL[m],r.key+': '+f1(r.mean)+'%')+extra+'</div></li>'}).join('');
-  $('smallNote').textContent=(L.small.length?'لم تُرتَّب الشعب التي فيها أقل من '+DATA.agg.min_n+' طلاب ('+L.small.map(function(c){return c.grade+' - '+c.sec+': '+c.n}).join('، ')+')، وغالبا هي أخطاء في اختيار الشعبة. ':'')+'هامش الخطأ التقريبي لمتوسط الشعبة ±'+f1(DATA.agg.moe)+' نقطة، فلا يُعتمد على فروق أقل منه بين شعبتين متجاورتين.';
-  var b=(m=='C'?R.C:R[m]);
-  $('distNote').textContent=m=='C'?'المتوسط العام للطلاب الذين أدّوا الاختبارين.':'نتيجة '+NAME[m]+'.';
-  var mx=Math.max.apply(null,b.dist.map(function(d){return d.n}));
-  $('hist').innerHTML=b.dist.map(function(d){return '<div title="'+d.label+': '+d.n+' طالبا"><span>'+d.n+'</span><span class="b" style="height:'+(d.n/mx*120)+'px;--c:'+COL[m]+'"></span><small>'+d.label+'</small></div>'}).join('');
+    return '<li class="row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(r.grade)+' - فصل '+esc(r.sec)+'<small>'+r.n+' طالبا</small></span><div>'+bar(r.mean,COL[m],r.key+': '+f1(r.mean)+'%')+extra+'</div></li>'}).join('');
+  $('smallNote').textContent=(L.small.length?'لم تُرتَّب الفصول التي فيها أقل من '+DATA.agg.min_n+' طلاب ('+L.small.map(function(c){return c.grade+' - فصل '+c.sec+': '+c.n}).join('، ')+')، وغالبا هي أخطاء في اختيار الفصل. ':'')+'هامش الخطأ التقريبي لمتوسط الفصل ±'+f1(DATA.agg.moe)+' نقطة، فلا يُعتمد على فروق أقل منه بين فصلين متجاورين.';
   var bs=document.querySelectorAll('.seg button');for(var i=0;i<bs.length;i++)bs[i].setAttribute('aria-pressed',bs[i].dataset.m==m);
-}
-function renderItems(){
-  function one(t,el,color){
-    var b=DATA.R[t];
-    $(el).innerHTML=b.items.map(function(it){
-      if(!it.scored){var top=it.options[0];return '<li class="row"><span class="rk">س'+it.q+'</span><span class="nm">غير مصحح<small>لا توجد درجات في الملف</small></span><span class="mini">الأكثر اختيارا: '+opt(top.opt)+' ('+f1(top.pct)+'%)</span></li>'}
-      var tag=it.q==b.easiest?'<span class="tag e">الأسهل</span>':it.q==b.hardest?'<span class="tag h">الأصعب</span>':'';
-      var tw=it.top_wrong?('الأكثر اختيارا خطأ: '+opt(it.top_wrong)+' ('+f1(it.top_wrong_pct)+'%)'):'';
-      var d=it.disc,dl=d>=.3?'جيد':d>=.2?'مقبول':'ضعيف';
-      var det=t=='V'?esc(it.stem):'';
-      return '<li class="row"><span class="rk">س'+it.q+'</span><span class="nm">'+(det||'')+tag+'</span><div>'+bar(it.p,color,'س'+it.q+': '+f1(it.p)+'% إجابة صحيحة')+'<div class="mini"><span>التمييز '+d.toFixed(2)+' ('+dl+')</span><span>'+esc(tw)+'</span></div></div></li>'}).join('');
-  }
-  one('Q','qItems','var(--s-q)');one('V','vItems','var(--s-v)');
-  var K=DATA.agg.KEY,S=DATA.agg.stems;
-  $('keyTbl').innerHTML='<tr><th>السؤال</th><th>العلاقة المعطاة</th><th>الإجابة المعتمدة</th></tr>'+S.map(function(s,i){return '<tr><td>س'+(i+1)+'</td><td>'+esc(s)+'</td><td>'+esc(K[i+1])+'</td></tr>'}).join('');
-}
-function renderTime(){
-  var Q=DATA.R.Q.time,V=DATA.R.V.time;
-  $('timeK').innerHTML=[['متوسط الكمي',f1(Q.mean)+' د','الوسيط '+f1(Q.median)+' د','var(--s-q)'],['متوسط اللفظي',f1(V.mean)+' د','الوسيط '+f1(V.median)+' د','var(--s-v)'],
-   ['أنهوا في أقل من دقيقة',Q.fast_n+' / '+V.fast_n,'كمي / لفظي','']].map(function(x){return '<div class="kpi"><div class="l">'+(x[3]?'<span class="dot" style="background:'+x[3]+'"></span>':'')+x[0]+'</div><div class="v">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'}).join('');
-  var rows='<tr><th></th><th>الكمي</th><th>اللفظي</th></tr>'+
-   '<tr><td>متوسط الدرجة لمن أنهى في أقل من دقيقة</td><td>'+f1(Q.fast_mean_pct)+'%</td><td>'+f1(V.fast_mean_pct)+'%</td></tr>'+
-   '<tr><td>متوسط الدرجة لبقية الطلاب</td><td>'+f1(Q.slow_mean_pct)+'%</td><td>'+f1(V.slow_mean_pct)+'%</td></tr>'+
-   '<tr><td>الارتباط بين الزمن والدرجة</td><td>'+Q.corr.toFixed(2)+'</td><td>'+V.corr.toFixed(2)+'</td></tr>';
-  var G={};DATA.R.Q.time.by_grade.forEach(function(x){G[x.key]={q:x.mean}});DATA.R.V.time.by_grade.forEach(function(x){(G[x.key]=G[x.key]||{}).v=x.mean});
-  Object.keys(G).forEach(function(k){rows+='<tr><td>متوسط الزمن - '+esc(k)+'</td><td>'+f1(G[k].q)+' د</td><td>'+f1(G[k].v)+' د</td></tr>'});
-  $('timeTbl').innerHTML=rows;
-}
-function renderNarr(){
-  $('narr').innerHTML=DATA.agg.N.map(function(s){return '<h3>'+esc(s.h)+'</h3>'+(s.p||[]).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+(s.list?'<ul>'+s.list.map(function(p){return '<li>'+esc(p)+'</li>'}).join('')+'</ul>':'')}).join('');
-  $('notes').innerHTML=DATA.agg.notes.map(function(n){return '<li>'+esc(n)+'</li>'}).join('');
 }
 /* ---- lookup ---- */
 var enc=new TextEncoder();
@@ -237,7 +173,7 @@ function normId(s){return s.replace(/[٠-٩]/g,function(c){return c.charCodeAt(0
 function fail(t){var e=$('err');e.textContent=t;e.style.display='block';$('res').innerHTML='';$('go').disabled=false;$('go').textContent='استعلام'}
 function chips(it,n){var o='';for(var i=0;i<n;i++){var v=it[i];o+='<span class="chip '+(v==null?'na':v?'ok':'no')+'" title="س'+(i+1)+'">'+(i+1)+(v==null?'':v?' ✓':' ✗')+'</span>'}return o}
 function show(p){
-  var h='<dl class="info"><div><dt>اسم الطالب</dt><dd>'+esc(p.n)+'</dd></div><div><dt>السجل المدني</dt><dd class="ltr">'+esc(p.i)+'</dd></div><div><dt>الصف</dt><dd>'+esc(p.g||'-')+'</dd></div><div><dt>الشعبة</dt><dd>'+esc(p.s||'-')+'</dd></div></dl><div class="sc">';
+  var h='<dl class="info"><div><dt>اسم الطالب</dt><dd>'+esc(p.n)+'</dd></div><div><dt>السجل المدني</dt><dd class="ltr">'+esc(p.i)+'</dd></div><div><dt>الصف</dt><dd>'+esc(p.g||'-')+'</dd></div><div><dt>الفصل</dt><dd>'+esc(p.s||'-')+'</dd></div></dl><div class="sc">';
   if(p.avg!=null){h+='<div style="border-color:var(--s-all)"><div class="l note"><span class="dot" style="background:var(--s-all)"></span>المتوسط العام</div><div class="big">'+f1(p.avg)+'%</div><div>المستوى: '+esc(p.lvl)+'</div></div>'}
   if(p.q){h+='<div><div class="l note"><span class="dot" style="background:var(--s-q)"></span>الاختبار الكمي</div><div class="big">'+p.q.sc+' / 16</div><div>'+f1(p.q.pct)+'% - زمن الحل '+f1(p.q.t)+' د</div><div class="chips">'+chips(p.q.it,8)+'</div></div>'}
   else h+='<div><div class="l note">الاختبار الكمي</div><div>لم يؤدِّ الاختبار</div></div>';
@@ -270,7 +206,7 @@ $('f').addEventListener('submit',async function(ev){
 document.querySelector('.seg').addEventListener('click',function(e){var m=e.target.dataset&&e.target.dataset.m;if(m){mode=m;renderRank()}});
 fetch('data.json').then(function(r){return r.json()}).then(function(j){
   DATA={R:j.agg.R,agg:j.agg,stu:j.stu};
-  renderKpis();renderRank();renderItems();renderTime();renderNarr();
+  renderKpis();renderRank();
 }).catch(function(){document.body.insertAdjacentHTML('afterbegin','<p class="msg">تعذر تحميل البيانات.</p>')});
 })();
 </script>
