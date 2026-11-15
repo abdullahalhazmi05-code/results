@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>نتائج الاختبار التجريبي</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one wide column; dashboard first (KPIs, ranking, items, time, analysis), student lookup last, linked from the header */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --fg:#14231d; --muted:#5a6b63; --line:#d6e0da; --track:#e6ede9;
+  --accent:#0b6b4f; --accent-fg:#ffffff; --accent-soft:#e1f0e9;
+  --s-all:#0b6b4f; --s-q:#2a78d6; --s-v:#eb6834;
+  --good:#1b7a3d; --bad:#b3342f; --warn:#8a5a00; --err-bg:#fbeaea; --err:#a32b2b;
+  --font:'IBM Plex Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1815; --surface:#17231e; --fg:#e7f0ec; --muted:#98aaa1; --line:#2b3d35; --track:#233229;
+  --accent:#4ec29a; --accent-fg:#06231a; --accent-soft:#1c3329;
+  --s-all:#4ec29a; --s-q:#3987e5; --s-v:#d95926; --good:#5fd08a; --bad:#ff8f89; --warn:#e6b450; --err-bg:#3a1d1d; --err:#ff9a9a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1815; --surface:#17231e; --fg:#e7f0ec; --muted:#98aaa1; --line:#2b3d35; --track:#233229;
+  --accent:#4ec29a; --accent-fg:#06231a; --accent-soft:#1c3329;
+  --s-all:#4ec29a; --s-q:#3987e5; --s-v:#d95926; --good:#5fd08a; --bad:#ff8f89; --warn:#e6b450; --err-bg:#3a1d1d; --err:#ff9a9a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.7;
+  padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+h1,h2,h3{line-height:1.3;margin:0;text-wrap:balance}
+h1{font-size:1.7rem} h2{font-size:1.2rem} h3{font-size:1rem}
+.school{font-size:.9rem;font-weight:600;color:var(--accent);letter-spacing:.02em}
+.sub{color:var(--muted);margin:4px 0 0}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:flex-end}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+a.btn,button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--accent);color:var(--accent-fg);text-decoration:none;display:inline-block}
+a.btn.alt,button.alt{background:var(--accent-soft);color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
+.card>h2{margin-bottom:4px}
+.note{font-size:.88rem;color:var(--muted);margin:0 0 12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.kpi .l{font-size:.82rem;color:var(--muted);letter-spacing:.02em}
+.kpi .v{font-size:1.9rem;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:.8rem;color:var(--muted)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:6px;vertical-align:baseline}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:6px 0 14px}
+.seg button{border-radius:0;background:transparent;color:var(--fg);font-weight:500;padding:7px 16px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.rows{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.row{display:grid;grid-template-columns:2.2rem minmax(7.5rem,11rem) 1fr;gap:10px;align-items:center;min-width:0}
+#qItems .row,#vItems .row{align-items:start}
+.rk{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.nm{font-weight:500;min-width:0}
+.nm small{display:block;color:var(--muted);font-size:.78rem}
+.bar{position:relative;height:26px;background:var(--track);border-radius:4px;min-width:0}
+.bar i{position:absolute;inset-block:0;inset-inline-start:0;border-radius:0 4px 4px 0;background:var(--c,var(--s-all))}
+[dir=rtl] .bar i{border-radius:4px 0 0 4px}
+.bar b{position:absolute;inset-block:0;inset-inline-end:8px;display:flex;align-items:center;font-size:.85rem;font-variant-numeric:tabular-nums}
+.bar.sm{height:18px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:20px}
+.mini{display:flex;gap:10px;font-size:.78rem;color:var(--muted);flex-wrap:wrap;margin-top:2px}
+.tag{font-size:.72rem;font-weight:600;border-radius:4px;padding:1px 7px;margin-inline-start:6px;vertical-align:middle}
+.tag.e{background:var(--accent-soft);color:var(--good)} .tag.h{background:var(--err-bg);color:var(--bad)} .tag.u{background:var(--track);color:var(--muted)}
+.hist{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:170px;margin-top:8px}
+.hist div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px;font-size:.8rem;min-width:0}
+.hist span.b{width:100%;border-radius:4px 4px 0 0;background:var(--c,var(--s-all));min-height:2px}
+.hist small{color:var(--muted);font-size:.72rem;text-align:center;line-height:1.2}
+.prose p{margin:0 0 10px;max-width:72ch} .prose h3{margin:14px 0 6px;color:var(--accent)}
+.prose ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px;max-width:76ch}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:6px 10px;text-align:start;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:.8rem}
+.scroll{overflow-x:auto}
+details{margin-top:8px} summary{cursor:pointer;font-weight:600;color:var(--accent)}
+form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;max-width:520px}
+form div{flex:1 1 240px}
+label{display:block;font-weight:600;margin-bottom:4px}
+input{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;direction:ltr;text-align:right}
+.msg{padding:10px 12px;border-radius:8px;background:var(--err-bg);color:var(--err);font-weight:500;margin-top:10px}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px;margin:16px 0}
+.info dt{font-size:.8rem;color:var(--muted)} .info dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.sc{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:12px 0}
+.sc>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sc .big{font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{min-width:2.3rem;text-align:center;border-radius:6px;padding:2px 8px;font-size:.82rem;font-weight:600;border:1px solid var(--line)}
+.chip.ok{background:var(--accent-soft);color:var(--good)} .chip.no{background:var(--err-bg);color:var(--bad)} .chip.na{color:var(--muted)}
+.ltr{direction:ltr;unicode-bidi:plaintext;text-align:right}
+#err{display:none}
+@media (max-width:560px){.row{grid-template-columns:1.8rem 1fr}.row .bar{grid-column:1/-1}h1{font-size:1.4rem}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="school">ثانوية كرامة الأحمر - مسارات</div>
+      <h1>نتائج الاختبار التجريبي</h1>
+      <p class="sub">الكمي واللفظي، الفصل الدراسي الأول 1447-1448</p>
+    </div>
+    <nav aria-label="التنقل"><a class="btn" href="#lookup" id="goLookup">استعلام الطالب</a><a class="btn alt" href="#analysis">التحليل والتوصيات</a></nav>
+  </header>
+
+  <section class="kpis" id="kpis" aria-label="مؤشرات رئيسية"></section>
+
+  <section class="card" id="rank">
+    <h2>متوسط الصفوف والشعب وترتيبها</h2>
+    <p class="note" id="rankNote"></p>
+    <div class="seg" role="group" aria-label="نوع النتيجة">
+      <button type="button" data-m="C" aria-pressed="true">المتوسط العام</button>
+      <button type="button" data-m="Q" aria-pressed="false">الكمي</button>
+      <button type="button" data-m="V" aria-pressed="false">اللفظي</button>
+    </div>
+    <h3>الصفوف</h3>
+    <ul class="rows" id="gradeRows"></ul>
+    <h3 style="margin-top:18px">الشعب (مرتبة من الأعلى)</h3>
+    <ul class="rows" id="classRows"></ul>
+    <p class="note" id="smallNote" style="margin-top:12px"></p>
+  </section>
+
+  <section class="card" id="distCard">
+    <h2>توزيع الطلاب حسب النتيجة</h2>
+    <p class="note" id="distNote"></p>
+    <div class="hist" id="hist" role="img" aria-label="توزيع الطلاب"></div>
+  </section>
+
+  <section class="card" id="items">
+    <h2>الأسئلة: الأسهل والأصعب</h2>
+    <p class="note">النسبة هي من أجابوا الإجابة الصحيحة. «التمييز» يقيس هل يجيب الطلاب الأقوى صحيحا أكثر من الأضعف (فوق 0.30 جيد، ودون 0.20 ضعيف).</p>
+    <div class="two"><div><h3><span class="dot" style="background:var(--s-q)"></span>الاختبار الكمي</h3><ul class="rows" id="qItems"></ul></div>
+    <div><h3><span class="dot" style="background:var(--s-v)"></span>الاختبار اللفظي</h3><ul class="rows" id="vItems"></ul></div></div>
+    <details><summary>مفتاح التصحيح المستخدم في اللفظي</summary><div class="scroll"><table id="keyTbl"></table></div></details>
+  </section>
+
+  <section class="card" id="time">
+    <h2>زمن الحل</h2>
+    <p class="note">الزمن من بدء النموذج إلى إرساله، لكل اختبار كاملا (لا يتوفر زمن كل سؤال).</p>
+    <div class="kpis" id="timeK"></div>
+    <div class="scroll" style="margin-top:12px"><table id="timeTbl"></table></div>
+  </section>
+
+  <section class="card prose" id="analysis">
+    <h2>التحليل الإحصائي والتوصيات</h2>
+    <div id="narr"></div>
+    <details><summary>ملاحظات عن البيانات</summary><ul id="notes" style="margin-top:8px"></ul></details>
+  </section>
+
+  <section class="card" id="lookup">
+    <h2>استعلام الطالب</h2>
+    <p class="note">اكتب رقم السجل المدني لعرض نتيجتك في الاختبارين وترتيبك.</p>
+    <form id="f" autocomplete="off">
+      <div><label for="nid">السجل المدني</label><input id="nid" inputmode="numeric" required></div>
+      <button id="go" type="submit">استعلام</button>
+    </form>
+    <div id="err" class="msg" role="alert"></div>
+    <div id="res" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},DATA=null,mode='C';
+var f1=function(x){return (Math.round(x*10)/10).toFixed(1)};
+var AR='٠١٢٣٤٥٦٧٨٩';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function opt(o){return String(o).replace(/ا/g,'أ')}
+var COL={C:'var(--s-all)',Q:'var(--s-q)',V:'var(--s-v)'},NAME={C:'المتوسط العام',Q:'الكمي',V:'اللفظي'};
+function bar(v,c,label,sm){return '<div class="bar'+(sm?' sm':'')+'" title="'+esc(label)+'"><i style="width:'+Math.max(0,Math.min(100,v))+'%;--c:'+c+'"></i><b>'+f1(v)+'%</b></div>'}
+
+function renderKpis(){
+  var R=DATA.R,Q=R.Q,V=R.V,C=R.C;
+  var k=[['المتوسط العام',f1(C.mean)+'%','لـ'+C.n_both+' طالبا أدّوا الاختبارين',COL.C],
+   ['متوسط الكمي',f1(Q.mean_pct)+'%',f1(Q.mean_raw)+' من 16 ('+Q.n+' طالبا)',COL.Q],
+   ['متوسط اللفظي',f1(V.mean_pct)+'%',f1(V.mean_raw)+' من 10 ('+V.n+' طالبا)',COL.V],
+   ['متوسط زمن الحل',f1(Q.time.mean)+' / '+f1(V.time.mean)+' د','كمي / لفظي',null],
+   ['دون 50%',C.support_n,'طالبا من '+C.n_both+' يحتاجون دعما',null]];
+  $('kpis').innerHTML=k.map(function(x){return '<div class="kpi"><div class="l">'+(x[3]?'<span class="dot" style="background:'+x[3]+'"></span>':'')+x[0]+'</div><div class="v">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'}).join('');
+}
+function classList(m){
+  var R=DATA.R,src=(m=='C'?R.C:R[m]).by_class,mn=DATA.agg.min_n;
+  var ok=src.filter(function(c){return c.n>=mn}).sort(function(a,b){return b.mean-a.mean});
+  var small=src.filter(function(c){return c.n<mn});
+  return {ok:ok,small:small};
+}
+function renderRank(){
+  var R=DATA.R,m=mode,g=(m=='C'?R.C:R[m]).by_grade.slice().sort(function(a,b){return b.mean-a.mean});
+  $('rankNote').textContent=m=='C'?'المتوسط العام = متوسط نسبتي الكمي واللفظي للطلاب الذين أدّوا الاختبارين فقط.':('متوسط '+NAME[m]+' لكل من أدّى الاختبار.');
+  $('gradeRows').innerHTML=g.map(function(r,i){return '<li class="row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(r.key)+'<small>'+r.n+' طالبا</small></span>'+bar(r.mean,COL[m],r.key+': '+f1(r.mean)+'%')+'</li>'}).join('');
+  var L=classList(m);
+  $('classRows').innerHTML=L.ok.map(function(r,i){
+    var extra=m=='C'?'<div class="mini"><span><span class="dot" style="background:var(--s-q)"></span>كمي '+f1(r.q)+'%</span><span><span class="dot" style="background:var(--s-v)"></span>لفظي '+f1(r.v)+'%</span></div>':'';
+    return '<li class="row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(r.grade)+' - '+esc(r.sec)+'<small>'+r.n+' طالبا</small></span><div>'+bar(r.mean,COL[m],r.key+': '+f1(r.mean)+'%')+extra+'</div></li>'}).join('');
+  $('smallNote').textContent=(L.small.length?'لم تُرتَّب الشعب التي فيها أقل من '+DATA.agg.min_n+' طلاب ('+L.small.map(function(c){return c.grade+' - '+c.sec+': '+c.n}).join('، ')+')، وغالبا هي أخطاء في اختيار الشعبة. ':'')+'هامش الخطأ التقريبي لمتوسط الشعبة ±'+f1(DATA.agg.moe)+' نقطة، فلا يُعتمد على فروق أقل منه بين شعبتين متجاورتين.';
+  var b=(m=='C'?R.C:R[m]);
+  $('distNote').textContent=m=='C'?'المتوسط العام للطلاب الذين أدّوا الاختبارين.':'نتيجة '+NAME[m]+'.';
+  var mx=Math.max.apply(null,b.dist.map(function(d){return d.n}));
+  $('hist').innerHTML=b.dist.map(function(d){return '<div title="'+d.label+': '+d.n+' طالبا"><span>'+d.n+'</span><span class="b" style="height:'+(d.n/mx*120)+'px;--c:'+COL[m]+'"></span><small>'+d.label+'</small></div>'}).join('');
+  var bs=document.querySelectorAll('.seg button');for(var i=0;i<bs.length;i++)bs[i].setAttribute('aria-pressed',bs[i].dataset.m==m);
+}
+function renderItems(){
+  function one(t,el,color){
+    var b=DATA.R[t];
+    $(el).innerHTML=b.items.map(function(it){
+      if(!it.scored){var top=it.options[0];return '<li class="row"><span class="rk">س'+it.q+'</span><span class="nm">غير مصحح<small>لا توجد درجات في الملف</small></span><span class="mini">الأكثر اختيارا: '+opt(top.opt)+' ('+f1(top.pct)+'%)</span></li>'}
+      var tag=it.q==b.easiest?'<span class="tag e">الأسهل</span>':it.q==b.hardest?'<span class="tag h">الأصعب</span>':'';
+      var tw=it.top_wrong?('الأكثر اختيارا خطأ: '+opt(it.top_wrong)+' ('+f1(it.top_wrong_pct)+'%)'):'';
+      var d=it.disc,dl=d>=.3?'جيد':d>=.2?'مقبول':'ضعيف';
+      var det=t=='V'?esc(it.stem):'';
+      return '<li class="row"><span class="rk">س'+it.q+'</span><span class="nm">'+(det||'')+tag+'</span><div>'+bar(it.p,color,'س'+it.q+': '+f1(it.p)+'% إجابة صحيحة')+'<div class="mini"><span>التمييز '+d.toFixed(2)+' ('+dl+')</span><span>'+esc(tw)+'</span></div></div></li>'}).join('');
+  }
+  one('Q','qItems','var(--s-q)');one('V','vItems','var(--s-v)');
+  var K=DATA.agg.KEY,S=DATA.agg.stems;
+  $('keyTbl').innerHTML='<tr><th>السؤال</th><th>العلاقة المعطاة</th><th>الإجابة المعتمدة</th></tr>'+S.map(function(s,i){return '<tr><td>س'+(i+1)+'</td><td>'+esc(s)+'</td><td>'+esc(K[i+1])+'</td></tr>'}).join('');
+}
+function renderTime(){
+  var Q=DATA.R.Q.time,V=DATA.R.V.time;
+  $('timeK').innerHTML=[['متوسط الكمي',f1(Q.mean)+' د','الوسيط '+f1(Q.median)+' د','var(--s-q)'],['متوسط اللفظي',f1(V.mean)+' د','الوسيط '+f1(V.median)+' د','var(--s-v)'],
+   ['أنهوا في أقل من دقيقة',Q.fast_n+' / '+V.fast_n,'كمي / لفظي','']].map(function(x){return '<div class="kpi"><div class="l">'+(x[3]?'<span class="dot" style="background:'+x[3]+'"></span>':'')+x[0]+'</div><div class="v">'+x[1]+'</div><div class="d">'+x[2]+'</div></div>'}).join('');
+  var rows='<tr><th></th><th>الكمي</th><th>اللفظي</th></tr>'+
+   '<tr><td>متوسط الدرجة لمن أنهى في أقل من دقيقة</td><td>'+f1(Q.fast_mean_pct)+'%</td><td>'+f1(V.fast_mean_pct)+'%</td></tr>'+
+   '<tr><td>متوسط الدرجة لبقية الطلاب</td><td>'+f1(Q.slow_mean_pct)+'%</td><td>'+f1(V.slow_mean_pct)+'%</td></tr>'+
+   '<tr><td>الارتباط بين الزمن والدرجة</td><td>'+Q.corr.toFixed(2)+'</td><td>'+V.corr.toFixed(2)+'</td></tr>';
+  var G={};DATA.R.Q.time.by_grade.forEach(function(x){G[x.key]={q:x.mean}});DATA.R.V.time.by_grade.forEach(function(x){(G[x.key]=G[x.key]||{}).v=x.mean});
+  Object.keys(G).forEach(function(k){rows+='<tr><td>متوسط الزمن - '+esc(k)+'</td><td>'+f1(G[k].q)+' د</td><td>'+f1(G[k].v)+' د</td></tr>'});
+  $('timeTbl').innerHTML=rows;
+}
+function renderNarr(){
+  $('narr').innerHTML=DATA.agg.N.map(function(s){return '<h3>'+esc(s.h)+'</h3>'+(s.p||[]).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+(s.list?'<ul>'+s.list.map(function(p){return '<li>'+esc(p)+'</li>'}).join('')+'</ul>':'')}).join('');
+  $('notes').innerHTML=DATA.agg.notes.map(function(n){return '<li>'+esc(n)+'</li>'}).join('');
+}
+/* ---- lookup ---- */
+var enc=new TextEncoder();
+function b64u8(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
+function normId(s){return s.replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[۰-۹]/g,function(c){return c.charCodeAt(0)-1776}).replace(/\D/g,'').replace(/^0+/,'')}
+function fail(t){var e=$('err');e.textContent=t;e.style.display='block';$('res').innerHTML='';$('go').disabled=false;$('go').textContent='استعلام'}
+function chips(it,n){var o='';for(var i=0;i<n;i++){var v=it[i];o+='<span class="chip '+(v==null?'na':v?'ok':'no')+'" title="س'+(i+1)+'">'+(i+1)+(v==null?'':v?' ✓':' ✗')+'</span>'}return o}
+function show(p){
+  var h='<dl class="info"><div><dt>اسم الطالب</dt><dd>'+esc(p.n)+'</dd></div><div><dt>السجل المدني</dt><dd class="ltr">'+esc(p.i)+'</dd></div><div><dt>الصف</dt><dd>'+esc(p.g||'-')+'</dd></div><div><dt>الشعبة</dt><dd>'+esc(p.s||'-')+'</dd></div></dl><div class="sc">';
+  if(p.avg!=null){h+='<div style="border-color:var(--s-all)"><div class="l note"><span class="dot" style="background:var(--s-all)"></span>المتوسط العام</div><div class="big">'+f1(p.avg)+'%</div><div>المستوى: '+esc(p.lvl)+'</div></div>'}
+  if(p.q){h+='<div><div class="l note"><span class="dot" style="background:var(--s-q)"></span>الاختبار الكمي</div><div class="big">'+p.q.sc+' / 16</div><div>'+f1(p.q.pct)+'% - زمن الحل '+f1(p.q.t)+' د</div><div class="chips">'+chips(p.q.it,8)+'</div></div>'}
+  else h+='<div><div class="l note">الاختبار الكمي</div><div>لم يؤدِّ الاختبار</div></div>';
+  if(p.v){h+='<div><div class="l note"><span class="dot" style="background:var(--s-v)"></span>الاختبار اللفظي</div><div class="big">'+p.v.sc+' / 10</div><div>'+f1(p.v.pct)+'% - زمن الحل '+f1(p.v.t)+' د</div><div class="chips">'+chips(p.v.it,10)+'</div></div>'}
+  else h+='<div><div class="l note">الاختبار اللفظي</div><div>لم يؤدِّ الاختبار</div></div>';
+  h+='</div>';
+  if(p.avg!=null){
+    h+='<table><tr><th>الترتيب</th><th>ترتيبك</th><th>متوسط المجموعة</th></tr>';
+    if(p.rc)h+='<tr><td>في الشعبة</td><td>'+p.rc+' من '+p.rcn+'</td><td>'+f1(p.ca)+'%</td></tr>';
+    if(p.rg)h+='<tr><td>في الصف</td><td>'+p.rg+' من '+p.rgn+'</td><td>'+f1(p.ga)+'%</td></tr>';
+    h+='<tr><td>في المدرسة</td><td>'+p.rk+' من '+p.rkn+'</td><td>'+f1(DATA.R.C.mean)+'%</td></tr></table>';
+    if(p.q&&p.q.t<1||p.v&&p.v.t<1)h+='<p class="note" style="margin-top:10px">ملاحظة: أُنهي أحد الاختبارين في أقل من دقيقة، وقد لا تعبّر نتيجته عن مستواك. يُنصح بإعادته.</p>';
+  }else h+='<p class="note">يظهر المتوسط والترتيب بعد أداء الاختبارين.</p>';
+  h+='<p class="note">الاختبار تجريبي وليس نتيجة نهائية. علامة ✓ تعني إجابة صحيحة. الاختبار الكمي من 8 أسئلة مصححة.</p>';
+  $('res').innerHTML=h;$('err').style.display='none';$('go').disabled=false;$('go').textContent='استعلام';
+}
+async function aesDec(key,blob){var d=b64u8(blob),k=await crypto.subtle.importKey('raw',key,'AES-GCM',false,['decrypt']);return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:d.slice(0,12)},k,d.slice(12)))}
+$('f').addEventListener('submit',async function(ev){
+  ev.preventDefault();var id=normId($('nid').value);
+  if(id.length<6)return fail('اكتب رقم السجل المدني كاملا.');
+  $('go').disabled=true;$('go').textContent='جار الاستعلام...';
+  try{
+    var H=hex(await crypto.subtle.digest('SHA-256',enc.encode('t|'+id)));
+    var w=DATA.stu[H];if(!w)return fail('لم يتم العثور على نتيجة بهذا الرقم. تأكد من السجل المدني.');
+    var km=await crypto.subtle.importKey('raw',enc.encode('k|'+id),'PBKDF2',false,['deriveBits']);
+    var Kd=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:enc.encode('tests-1447'),iterations:50000},km,256));
+    show(JSON.parse(new TextDecoder().decode(await aesDec(Kd,w))));
+  }catch(e){fail('تعذر عرض النتيجة. حاول مرة أخرى.')}
+});
+document.querySelector('.seg').addEventListener('click',function(e){var m=e.target.dataset&&e.target.dataset.m;if(m){mode=m;renderRank()}});
+fetch('data.json').then(function(r){return r.json()}).then(function(j){
+  DATA={R:j.agg.R,agg:j.agg,stu:j.stu};
+  renderKpis();renderRank();renderItems();renderTime();renderNarr();
+}).catch(function(){document.body.insertAdjacentHTML('afterbegin','<p class="msg">تعذر تحميل البيانات.</p>')});
+})();
+</script>
+</body>
+</html>
