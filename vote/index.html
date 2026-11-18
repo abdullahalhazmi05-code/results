@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>التصويت لمسابقة شاعر الوطن - ثانوية كرامة الأحمر</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#f2f7f8;--surface:#fff;--fg:#15333f;--muted:#5b707a;--line:#dbe6ea;--track:#e9f0f2;--navy:#15445a;--blue:#3d7eb9;--teal:#0da9a6;--green:#07a869;--beige:#c1b489;
+--brand:#3078a6;--brand-fg:#fff;--soft:#e4f1f6;--bar:#3d7eb9;--lead:#07a869;--ok:#0b7f4d;--ok-bg:#e3f5ec;--err:#a32b2b;--err-bg:#fbeaea;
+--font:'IBM Plex Sans Arabic','Segoe UI',Tahoma,system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0c1d25;--surface:#122b36;--fg:#e6f0f3;--muted:#9db4bd;--line:#244553;--track:#1b3a47;--navy:#8fd3e6;--brand:#4f9bd0;--brand-fg:#07202c;--soft:#17394a;--bar:#5da2dc;--lead:#2fc88a;--ok:#5fd08a;--ok-bg:#16382b;--err:#ff9a9a;--err-bg:#3a1d1d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.7;padding:0 max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+h1,h2{margin:0;line-height:1.3;text-wrap:balance}
+.hero{margin:0 -16px;padding:26px 16px 58px;background:linear-gradient(100deg,#3078a6 0%,#0da9a6 55%,#07a869 100%);color:#fff}
+.hero-in{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.cap{width:62px;height:62px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 14px rgba(8,50,70,.25)}
+.school{font-size:.95rem;font-weight:600}
+.hero h1{font-size:1.8rem}
+.dots{height:6px;margin:18px auto 0;max-width:980px;background:radial-gradient(circle,rgba(255,255,255,.85) 2px,transparent 2.5px) 0 0/14px 6px repeat-x}
+main{max-width:980px;margin:-34px auto 0;display:flex;flex-direction:column;gap:18px}
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px}
+.tabs button{flex:1;font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px;cursor:pointer;background:transparent;color:var(--muted)}
+.tabs button[aria-selected=true]{background:var(--brand);color:var(--brand-fg)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.card-h::before{content:"";width:4px;height:22px;border-radius:2px;background:linear-gradient(var(--blue),var(--green))}
+.card-h h2{font-size:1.15rem;color:var(--navy)}
+.note{font-size:.88rem;color:var(--muted);margin:0 0 16px}
+.list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}
+.cand{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;padding:14px;background:var(--bg)}
+.num{width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:1.5rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#3078a6,#07a869)}
+.cand .nm{flex:1;font-weight:700;font-size:1.08rem;min-width:0}
+.cand .nm small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+button.vote{font:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 18px;cursor:pointer;background:var(--brand);color:var(--brand-fg)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.msg{padding:10px 14px;border-radius:10px;font-weight:600;margin-bottom:14px}
+.msg.ok{background:var(--ok-bg);color:var(--ok)}.msg.err{background:var(--err-bg);color:var(--err)}
+.total{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.kpi{flex:1 1 150px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 16px;border-inline-start:4px solid var(--teal)}
+.kpi span{display:block;font-size:.82rem;color:var(--muted)}.kpi b{font-size:1.8rem;color:var(--navy)}
+.rows{display:flex;flex-direction:column;gap:12px}
+.rw{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center}
+.rw .num{width:44px;height:44px;font-size:1.2rem}
+.rw .top{display:flex;justify-content:space-between;gap:8px;font-weight:700;margin-bottom:4px}
+.rw .top em{font-style:normal;font-weight:400;color:var(--muted)}
+.track{height:18px;background:var(--track);border-radius:9px;overflow:hidden}
+.fill{height:100%;border-radius:0 9px 9px 0;background:var(--bar);transition:width .6s ease;min-width:0}
+.rw.first .fill{background:var(--lead)}
+.cnt{font-size:1.6rem;font-weight:700;color:var(--navy);min-width:3ch;text-align:center}
+.live{font-size:.8rem;color:var(--muted)}.live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-inline-end:6px;animation:p 1.4s infinite}
+@keyframes p{50%{opacity:.25}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="hero"><div class="hero-in">
+<div class="cap"><svg width="38" height="38" viewBox="0 0 24 24" fill="none"><path d="M12 3 1 9l11 6 9-4.9V17h2V9L12 3Z" fill="#15445a"/><path d="M5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8-7-3.8Z" fill="#3078a6"/></svg></div>
+<div><div class="school">ثانوية كرامة الأحمر - مسارات</div><h1>مسابقة شاعر الوطن</h1></div></div><div class="dots"></div></header>
+<main>
+<div class="tabs" role="tablist"><button role="tab" id="t1" aria-selected="true">التصويت</button><button role="tab" id="t2" aria-selected="false">النتائج المباشرة</button></div>
+<section class="card" id="vp">
+<div class="card-h"><h2>اختر متسابقك</h2></div>
+<p class="note">لكل جهاز صوت واحد. اضغط «صوّت» بجانب المتسابق ثم أكّد الاختيار.</p>
+<div id="m" hidden></div><div class="list" id="list"></div></section>
+<section class="card" id="rp" hidden>
+<div class="card-h"><h2>النتائج المباشرة</h2></div>
+<p class="note live" id="lv">تتحدث تلقائيًا</p>
+<div class="total"><div class="kpi"><span>إجمالي الأصوات</span><b id="tot">0</b></div><div class="kpi"><span>المتصدر</span><b id="ld" style="font-size:1.25rem">-</b></div></div>
+<div class="rows" id="rows"></div></section>
+</main>
+<script>
+// Set this to your Firebase Realtime Database URL (no trailing slash). See README.
+const DB='https://shaer-alwatan-9d088-default-rtdb.europe-west1.firebasedatabase.app';
+const C=[{n:1,t:'حسام فتحي'},{n:3,t:'أحمد عبدالخالق'},{n:4,t:'ناصر خواجي'},{n:5,t:'خالد قناعي'},{n:6,t:'عبدالرحمن قطبي'},{n:8,t:'الحسن خواجي'}];
+const $=i=>document.getElementById(i);let V={},KEY='shaer-voted-v1',DID=(()=>{try{let d=localStorage.getItem('shaer-did');if(!d){d=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()).replace(/[^a-z0-9]/gi,'');localStorage.setItem('shaer-did',d)}return d}catch(e){return 'x'+Math.random().toString(36).slice(2)}})();
+const get=()=>{try{return localStorage.getItem(KEY)}catch(e){return null}};
+function msg(t,c){const m=$('m');m.className='msg '+c;m.textContent=t;m.hidden=!t}
+function drawList(){const v=get();$('list').innerHTML=C.map(x=>`<div class="cand"><div class="num">${x.n}</div><div class="nm">${x.t}<small>المتسابق رقم ${x.n}</small></div><button class="vote" data-n="${x.n}" ${v?'disabled':''}>${v==x.n?'صوتك ✓':'صوّت'}</button></div>`).join('');
+ if(v)msg('تم تسجيل صوتك للمتسابق رقم '+v+'. شكرًا لمشاركتك.','ok')}
+$('list').onclick=async e=>{const b=e.target.closest('button.vote');if(!b||get())return;const n=b.dataset.n,c=C.find(x=>x.n==n);
+ if(!confirm('تأكيد التصويت للمتسابق رقم '+n+': '+c.t+'؟ لا يمكن التعديل بعد التأكيد.'))return;
+ document.querySelectorAll('.vote').forEach(x=>x.disabled=true);
+ try{const r=await fetch(DB+'/.json',{method:'PATCH',body:JSON.stringify({['votes/'+n]:{'.sv':{increment:1}},['voters/'+DID]:Number(n)})});if(r.status==401||r.status==403){try{localStorage.setItem(KEY,n)}catch(e){}drawList();return msg('سبق تسجيل صوت من هذا الجهاز.','err')}if(!r.ok)throw 0;
+  try{localStorage.setItem(KEY,n)}catch(e){}drawList();msg('تم تسجيل صوتك للمتسابق رقم '+n+'. شكرًا لمشاركتك.','ok')}
+ catch(x){drawList();msg('تعذر تسجيل الصوت، حاول مرة أخرى.','err')}};
+function drawRes(){const rows=C.map(x=>({...x,v:+V[x.n]||0})).sort((a,b)=>b.v-a.v||a.n-b.n);const T=rows.reduce((s,x)=>s+x.v,0),mx=Math.max(1,rows[0].v);
+ $('tot').textContent=T;$('ld').textContent=T&&rows[0].v>(rows[1]?rows[1].v:0)?rows[0].t:(T?'تعادل':'-');
+ $('rows').innerHTML=rows.map((x,i)=>`<div class="rw ${i==0&&T&&x.v>rows[1].v?'first':''}"><div class="num">${x.n}</div><div><div class="top"><span>${x.t}</span><em>${T?Math.round(x.v/T*100):0}%</em></div><div class="track"><div class="fill" style="width:${x.v/mx*100}%"></div></div></div><div class="cnt">${x.v}</div></div>`).join('')}
+async function poll(){try{const r=await fetch(DB+'/votes.json',{cache:'no-store'});V=(await r.json())||{};drawRes();$('lv').textContent='تتحدث تلقائيًا كل ثانيتين'}catch(e){$('lv').textContent='تعذر الاتصال، تتم إعادة المحاولة...'}}
+function tab(w){$('vp').hidden=w!=2?false:true;$('rp').hidden=w==2?false:true;$('t1').setAttribute('aria-selected',w!=2);$('t2').setAttribute('aria-selected',w==2);try{history.replaceState(null,'',w==2?'#results':'#')}catch(e){}}
+$('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
+drawList();drawRes();poll();setInterval(poll,2000);if(location.hash=='#results')tab(2);
+</script>
+</body></html>
